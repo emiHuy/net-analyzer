@@ -1,4 +1,4 @@
-from scapy.all import sniff, IP, ARP
+from scapy.all import sniff, IP
 from datetime import datetime
 from store import store_packet
 

@@ -1,6 +1,10 @@
 from sqlalchemy import create_engine, insert, delete, Table, Column, String, Integer, DateTime, MetaData
+import os
 
-engine = create_engine('sqlite:///packets.db')
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DB_PATH = os.path.join(BASE_DIR, "..", "packets.db")
+
+engine = create_engine(f'sqlite:///{DB_PATH}')
 metadata = MetaData()
 
 # Define table w/ columns and data types
@@ -33,5 +37,3 @@ def clear_packets():
     with engine.connect() as conn:
         conn.execute(delete(packet_table))
         conn.commit()
-
-clear_packets()
