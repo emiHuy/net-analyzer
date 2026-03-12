@@ -2,7 +2,7 @@
 
 ## Project Status 
 ✅ **M1** — Packet capture to terminal
-
+✅ **M2** — Packet storage and stats (SQLite + SQLAlchemy)
 ---
 
 ## ⚠️ Disclaimer

@@ -13,11 +13,11 @@ def packet_callback(packet):
 
         # Store packet
         store_packet({
-            'src': src,
-            'dst': dst,
+            'src_ip': src,
+            'dst_ip': dst,
             'protocol': protocol,
             'size': len(packet),
-            'timestamp': datetime.now(),
+            'timestamp': datetime.now().isoformat(),
             })
     
-sniff(prn=packet_callback, store=False)
+sniff(prn=packet_callback, store=False, timeout=2000)

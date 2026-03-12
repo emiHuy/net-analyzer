@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine, insert, delete, Table, Column, String, Integer, DateTime, MetaData
+from sqlalchemy import create_engine, insert, delete, Table, Column, String, Integer, MetaData
 import os
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -15,7 +15,7 @@ packet_table = Table(
     Column('dst_ip', String),
     Column('protocol', Integer),
     Column('size', Integer),
-    Column('timestamp', DateTime),
+    Column('timestamp', String),
 )
 # Create table in database
 metadata.create_all(engine)
@@ -24,8 +24,8 @@ metadata.create_all(engine)
 def store_packet(packet):
     with engine.connect() as conn:
         conn.execute(insert(packet_table).values(
-            src_ip=packet['src'], 
-            dst_ip=packet['dst'], 
+            src_ip=packet['src_ip'], 
+            dst_ip=packet['dst_ip'], 
             protocol=packet['protocol'],
             size=packet['size'],
             timestamp=packet['timestamp'],

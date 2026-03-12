@@ -50,6 +50,42 @@ def packets_per_minute():
         results = conn.execute(query).fetchall()
     return results
 
+# Get total number of packets sent during captures
+def total_packet_count():
+    query = select(func.count()).select_from(packet_table)
+    with engine.connect() as conn:
+        results = conn.execute(query).fetchone()
+    return results[0]
+
+# Get average packet size
+def average_packet_size():
+    query = select(func.avg(packet_table.c.size))
+    with engine.connect() as conn:
+        results = conn.execute(query).fetchone()
+    return results[0]
+
+# Get X recent packets (default=100)
+def recent_packets(limit=100):
+    query = (
+        select(packet_table)
+        .order_by(packet_table.c.timestamp.desc())
+        .limit(limit)
+    )
+    with engine.connect() as conn:
+        results = conn.execute(query).fetchall()
+    formatted_results = []
+    for r in results:
+        formatted_results.append(
+        {
+            'src_ip': r[1],
+            'dst_ip': r[2],
+            'protocol': r[3],
+            'size': r[4],
+            'timestamp': r[5],
+        })
+    return formatted_results
+
+
 def print_all_results():
     print("=== Top 10 IPs ===")
     top_ips = top_10_ips()
@@ -65,5 +101,3 @@ def print_all_results():
     intervals = packets_per_minute()
     for time, num in intervals:
         print(time, "-", num, "packets")
-
-print_all_results()
