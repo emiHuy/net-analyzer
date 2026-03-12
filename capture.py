@@ -1,4 +1,6 @@
 from scapy.all import sniff, IP, ARP
+from datetime import datetime
+from store import store_packet
 
 # Capture packets being sent to and from network
 def packet_callback(packet):
@@ -7,8 +9,15 @@ def packet_callback(packet):
         src = packet[IP].src
         dst = packet[IP].dst
         protocol = packet[IP].proto
-        print(f"IP | {src} → {dst} | Protocol: {protocol}")
-    elif ARP in packet:
-        print(f"ARP | {packet[ARP].psrc} → {packet[ARP].pdst}")
+        print(f'IP | {src} → {dst} | Protocol: {protocol}')
 
+        # Store packet
+        store_packet({
+            'src': src,
+            'dst': dst,
+            'protocol': protocol,
+            'size': len(packet),
+            'timestamp': datetime.now(),
+            })
+    
 sniff(prn=packet_callback, store=False)
