@@ -1,6 +1,7 @@
 from sqlalchemy import select, func
 from store import engine, packet_table
 
+# Map protocol numbers to names
 protocol_names = {
     1: 'ICMP',
     2: 'IGMP',
@@ -8,113 +9,102 @@ protocol_names = {
     17: 'UDP',
     41: 'IPv6',
     89: 'OSPF',
-}    
+}
 
-# Get top 10 src IPs
-# Results format: [{src_ip: number of occurrences}, ...]
-def top_10_ips():
+def top_10_ips(session_id: int):
+    """Return top 10 source IPs by packet count."""
+    # Result format: [{'ip': '192.168.1.1', 'total': 120}, ...]
     query = (
         select(packet_table.c.src_ip, func.count().label('total'))
+        .where(packet_table.c.session_id == session_id)
         .group_by(packet_table.c.src_ip)
         .order_by(func.count().desc())
         .limit(10)
     )
     with engine.connect() as conn:
         results = conn.execute(query).fetchall()
-    formatted_results = []
-    for r in results:
-        formatted_results.append({'ip': r[0], 'total':r[1]})
-    return formatted_results
+    return [{'ip': r[0], 'total': r[1]} for r in results]
 
-# Get number of packets using each protocol
-# Results format: [{protocol (string): number of packets}, ...]
-def protocol_breakdown():
+
+def protocol_breakdown(session_id: int):
+    """Return packet counts grouped by protocol."""
+    # Result format: [{'protocol': 'TCP', 'total': 340}, ...]
     query = (
         select(packet_table.c.protocol, func.count().label('total'))
+        .where(packet_table.c.session_id == session_id)
         .group_by(packet_table.c.protocol)
     )
     with engine.connect() as conn:
         results = conn.execute(query).fetchall()
-    formatted_results = []
-    for r in results:
-        formatted_results.append({'protocol':protocol_names.get(r[0], 'Unknown'), 'total':r[1]})
-    return formatted_results
+    return [{'protocol': protocol_names.get(r[0], 'Unknown'), 'total': r[1]} for r in results]
 
 
-# Get number of packets sent each 
-# Results format: [{time: number of packets}, ...]
-def packets_per_minute():
+def packets_per_minute(session_id: int):
+    """Return number of packets captured per minute."""
+    # Result format: [{'time': '2026-03-16 14:32', 'total': 45}, ...]
+    minute = func.strftime('%Y-%m-%d %H:%M', packet_table.c.timestamp)
     query = (
-        select(func.strftime('%Y-%m-%d %H:%M', packet_table.c.timestamp), func.count().label('packets_per_min'))
-        .group_by(func.strftime('%Y-%m-%d %H:%M', packet_table.c.timestamp))
-        .order_by(func.strftime('%Y-%m-%d %H:%M', packet_table.c.timestamp).asc())
+        select(minute, func.count().label('packets_per_min'))
+        .where(packet_table.c.session_id == session_id)
+        .group_by(minute)
+        .order_by(minute.asc())
     )
     with engine.connect() as conn:
         results = conn.execute(query).fetchall()
-    formatted_results = []
-    for r in results:
-        formatted_results.append({'time':r[0], 'total':r[1]})
-    return formatted_results
+    return [{'time': r[0], 'total': r[1]} for r in results]
 
-# Get total number of packets sent during captures
-def total_packet_count():
-    query = select(func.count()).select_from(packet_table)
+
+def total_packet_count(session_id: int):
+    """Return total packets in a session."""
+    # Result format: int
+    query = (
+        select(func.count())
+        .select_from(packet_table)
+        .where(packet_table.c.session_id == session_id)
+    )
     with engine.connect() as conn:
-        results = conn.execute(query).fetchone()
-    return results[0]
+        return conn.execute(query).fetchone()[0]
 
-# Get average packet size
-def average_packet_size():
-    query = select(func.avg(packet_table.c.size))
+
+def average_packet_size(session_id: int):
+    """Return average packet size."""
+    # Result format: float
+    query = (
+        select(func.avg(packet_table.c.size))
+        .where(packet_table.c.session_id == session_id)
+    )
     with engine.connect() as conn:
-        results = conn.execute(query).fetchone()
-    return results[0]
+        return conn.execute(query).fetchone()[0]
 
-# Get X recent packets (default=100)
-def recent_packets(limit=100):
+
+def recent_packets(session_id: int, limit=100):
+    """Return most recent packets for a session."""
+    # Result format:
+    # [
+    #   {
+    #     'src_ip': '192.168.1.5',
+    #     'dst_ip': '8.8.8.8',
+    #     'protocol': 6,
+    #     'size': 74,
+    #     'timestamp': '2026-03-16T14:32:10'
+    #   },
+    #   ...
+    # ]
     query = (
         select(packet_table)
+        .where(packet_table.c.session_id == session_id)
         .order_by(packet_table.c.timestamp.desc())
         .limit(limit)
     )
     with engine.connect() as conn:
         results = conn.execute(query).fetchall()
-    formatted_results = []
-    for r in results:
-        formatted_results.append(
+    return [
         {
-            'src_ip': r[1],
-            'dst_ip': r[2],
-            'protocol': r[3],
-            'size': r[4],
-            'timestamp': r[5],
-        })
-    return formatted_results
-
-
-def print_all_results():
-    print("=== Top 10 IPs ===")
-    top_ips = top_10_ips()
-    for row in top_ips:
-        print(f'{row['ip']} - {row['total']} packets')
-
-    print("\n=== Protocol Breakdown ===")
-    protocols = protocol_breakdown()
-    for row in protocols:
-        print(f'{row['protocol']} - {row['total']} packets')
-
-    print("\n=== Packets per Minute ===")
-    intervals = packets_per_minute()
-    for row in intervals:
-        print(f'{row['time']} - {row['total']} packets')
-
-    print("\n=== Total Packets ===")
-    print(total_packet_count())
-
-    print("\n=== Average Packet Size ===")
-    print(average_packet_size())
-
-    print("\n=== Recent Packets ===")
-    recent = recent_packets()
-    for row in recent:
-        print(f'{protocol_names[row['protocol']]} {row['src_ip']} → {row['dst_ip']}, size: {row['size']} @ {row['timestamp']}')
+            'src_ip':    r[2],
+            'dst_ip':    r[3],
+            'protocol':  r[4],
+            'size':      r[5],
+            'timestamp': r[6],
+        }
+        for r in results
+    ]
