@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException, WebSocket
+from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import asyncio
@@ -11,7 +11,11 @@ app = FastAPI()
 # Allow frontent to access API
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=['http://localhost:5173'],
+    allow_origins=[
+        'http://localhost:5173', 
+        'http://127.0.0.1:5173',
+        'ws://127.0.0.1:8000',
+    ],
     allow_methods=['*'],
     allow_headers=['*'],
 )
@@ -32,7 +36,7 @@ def new_session(body: SessionCreate):
 @app.get('/sessions')
 def list_sessions():
     """Return all sessions."""
-    # Result format: [{'id': 1, 'name': 'Test', 'created_at': '...'}, ...]
+    # Result format: [{'id': 1, 'name': 'Test', 'created_at': '...', 'packet_count': 1}, ...]
     return get_all_sessions()
 
 
@@ -45,7 +49,7 @@ def delete_session(session_id: int):
 
 
 @app.get('/stats/{session_id}')
-def get_stats(session_id: int, limit: int = 100):
+def get_stats(session_id: int, limit: int = 50):
     """Return statistics for a session."""
     # Result format:
     # {
@@ -54,7 +58,8 @@ def get_stats(session_id: int, limit: int = 100):
     #   'packets_per_minute': [...],
     #   'total_packets': int,
     #   'average_packet_size': float,
-    #   'recent_packets': [...]
+    #   'recent_packets': [...],
+    #   'active_hosts': int
     # }
     return get_all_stats(session_id, limit)
 
@@ -87,11 +92,21 @@ def capture_status():
 
 # Web socket for live dashboard updates
 @app.websocket('/ws/{session_id}')
-async def websocket_endpoint(ws: WebSocket, session_id: int, limit: int = 100):
-    await ws.accept()
+async def websocket_endpoint(ws: WebSocket, session_id: int, limit: int = 15):
     try:
+        await ws.accept()
+        print(f'WebSocket accepted for session {session_id}')
         while True:
-            await ws.send_json(get_all_stats(session_id, limit))
-            await asyncio.sleep(2)
-    except:
+            try: 
+                stats = get_all_stats(session_id, limit)
+                await ws.send_json(stats)
+            except Exception as e:
+                print(f'Error sending stats for session {session_id}: {e}')
+                return
+            await asyncio.sleep(1)
+    except WebSocketDisconnect:
+        print(f'WebSocket disconnected for session {session_id}')
         return
+    except Exception as e:
+        print(f"WebSocket error: {e}")
+        await ws.close()

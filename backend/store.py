@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine, insert, delete, select, Table, Column, String, Integer, MetaData
+from sqlalchemy import create_engine, insert, delete, select, Table, Column, String, Integer, MetaData, func
 from datetime import datetime
 import os
 
@@ -46,9 +46,19 @@ def create_session(name: str) -> int:
 
 def get_all_sessions():
     """Return all saved sessions."""
+    query = (
+        select(
+            session_table.c.id,
+            session_table.c.name,
+            session_table.c.created_at,
+            func.count(packet_table.c.id).label('packet_count')
+        )
+        .outerjoin(packet_table, packet_table.c.session_id == session_table.c.id)
+        .group_by(session_table.c.id)
+    )
     with engine.connect() as conn:
-        results = conn.execute(select(session_table)).fetchall()
-    return [{'id': r[0], 'name': r[1], 'created_at': r[2]} for r in results]
+        results = conn.execute(query).fetchall()
+    return [{'id': r[0], 'name': r[1], 'created_at': r[2], 'packet_count': r[3]} for r in results]
 
 
 def clear_session(session_id: int):

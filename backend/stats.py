@@ -77,7 +77,7 @@ def average_packet_size(session_id: int):
         return conn.execute(query).fetchone()[0]
 
 
-def recent_packets(session_id: int, limit=100):
+def recent_packets(session_id: int, limit=15):
     """Return most recent packets for a session."""
     # Result format:
     # [
@@ -109,7 +109,18 @@ def recent_packets(session_id: int, limit=100):
         for r in results
     ]
 
-def get_all_stats(session_id: int, limit=100):
+def active_hosts(session_id: int):
+    """Return number of src IPs in a session."""
+    # Result format: int
+    query = (
+        select(func.count(packet_table.c.src_ip.distinct()))
+        .select_from(packet_table)
+        .where(packet_table.c.session_id == session_id)
+    )
+    with engine.connect() as conn:
+        return conn.execute(query).fetchone()[0]
+
+def get_all_stats(session_id: int, limit=50):
     # Result format:
     # {
     #   'top_10_ips': [...],
@@ -117,7 +128,8 @@ def get_all_stats(session_id: int, limit=100):
     #   'packets_per_minute': [...],
     #   'total_packets': int,
     #   'average_packet_size': float,
-    #   'recent_packets': [...]
+    #   'recent_packets': [...],
+    #   'active_hosts': int
     # }
     return {
         'top_10_ips':          top_10_ips(session_id),
@@ -126,4 +138,5 @@ def get_all_stats(session_id: int, limit=100):
         'total_packets':       total_packet_count(session_id),
         'average_packet_size': average_packet_size(session_id),
         'recent_packets':      recent_packets(session_id, limit),
+        'active_hosts':        active_hosts(session_id),
     }
