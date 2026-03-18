@@ -18,6 +18,7 @@ export default function SessionBar({ sessions = [], activeSessionId, onSelect, o
   const [adding, setAdding] = useState(false);
   const [newName, setNewName] = useState("");
   const wrapRef = useRef(null);
+  const addingRef = useRef(null);
 
   const active = sessions.find((s) => s.id === activeSessionId);
   const totalPackets = sessions.reduce((sum, s) => sum + (s.packet_count || 0), 0);
@@ -26,6 +27,18 @@ export default function SessionBar({ sessions = [], activeSessionId, onSelect, o
   useEffect(() => {
     const handler = (e) => {
       if (wrapRef.current && !wrapRef.current.contains(e.target)) setOpen(false);
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+
+  // close input when clicking outside
+  useEffect(() => {
+    const handler = (e) => {
+      if (addingRef.current && !addingRef.current.contains(e.target)) {
+        setAdding(false);
+        setNewName('');
+      }
     };
     document.addEventListener('mousedown', handler);
     return () => document.removeEventListener('mousedown', handler);
@@ -86,14 +99,16 @@ export default function SessionBar({ sessions = [], activeSessionId, onSelect, o
 
         {/* toggle between input and button */}
         {adding ? (
-          <input
-            className={styles.input}
-            autoFocus
-            placeholder="session name..."
-            value={newName}
-            onChange={(e) => setNewName(e.target.value)}
-            onKeyDown={handleCreate}
-          />
+          <div ref={addingRef}>
+            <input
+              className={styles.input}
+              autoFocus
+              placeholder="session name..."
+              value={newName}
+              onChange={(e) => setNewName(e.target.value)}
+              onKeyDown={handleCreate}
+            />
+          </div>
         ) : (
           <button className={styles.newBtn} onClick={() => setAdding(true)}>+ new</button>
         )}
