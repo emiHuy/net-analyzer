@@ -97,19 +97,14 @@ async def websocket_endpoint(ws: WebSocket, session_id: int, limit: int = 15):
         await ws.accept()
         print(f'WebSocket accepted for session {session_id}')
         while True:
-            try: 
-                stats = get_all_stats(session_id, limit)
-                await ws.send_json(stats)
-            except Exception as e:
-                print(f'Error sending stats for session {session_id}: {e}')
-                stop_capture()
-                return
+            await ws.send_json(get_all_stats(session_id, limit))
             await asyncio.sleep(1)
     except WebSocketDisconnect:
         print(f'WebSocket disconnected for session {session_id}')
-        stop_capture()
-        return
+        if get_capture_status():
+            stop_capture()
     except Exception as e:
         print(f"WebSocket error: {e}")
-        stop_capture()
+        if get_capture_status():
+            stop_capture()
         await ws.close()
