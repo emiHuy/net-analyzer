@@ -11,6 +11,7 @@ protocol_names = {
     89: 'OSPF',
 }
 
+
 def top_10_ips(session_id: int):
     """Return top 10 source IPs by packet count."""
     # Result format: [{'ip': '192.168.1.1', 'total': 120}, ...]
@@ -77,8 +78,8 @@ def average_packet_size(session_id: int):
         return conn.execute(query).fetchone()[0]
 
 
-def recent_packets(session_id: int, limit=15):
-    """Return most recent packets for a session."""
+def get_packets(session_id: int, limit=15, desc=True):
+    """Return X packets for a session."""
     # Result format:
     # [
     #   {
@@ -90,12 +91,21 @@ def recent_packets(session_id: int, limit=15):
     #   },
     #   ...
     # ]
+
+    # Create base query
     query = (
         select(packet_table)
         .where(packet_table.c.session_id == session_id)
-        .order_by(packet_table.c.timestamp.desc())
-        .limit(limit)
     )
+    # Order packets based on provided value
+    if desc:
+        query = query.order_by(packet_table.c.timestamp.desc())
+    else:
+        query = query.order_by(packet_table.c.timestamp.asc())
+    # Add limit based on provided value
+    if limit:
+        query = query.limit(limit)
+
     with engine.connect() as conn:
         results = conn.execute(query).fetchall()
     return [
@@ -109,6 +119,7 @@ def recent_packets(session_id: int, limit=15):
         for r in results
     ]
 
+
 def active_hosts(session_id: int):
     """Return number of src IPs in a session."""
     # Result format: int
@@ -119,6 +130,7 @@ def active_hosts(session_id: int):
     )
     with engine.connect() as conn:
         return conn.execute(query).fetchone()[0]
+
 
 def get_all_stats(session_id: int, limit=50):
     # Result format:
@@ -137,6 +149,6 @@ def get_all_stats(session_id: int, limit=50):
         'packets_per_minute':  packets_per_minute(session_id),
         'total_packets':       total_packet_count(session_id),
         'average_packet_size': average_packet_size(session_id),
-        'recent_packets':      recent_packets(session_id, limit),
+        'recent_packets':      get_packets(session_id, limit),
         'active_hosts':        active_hosts(session_id),
     }

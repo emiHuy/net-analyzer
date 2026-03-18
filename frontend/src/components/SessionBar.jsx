@@ -13,7 +13,7 @@ function formatTimestamp(ts) {
   }
 }
 
-export default function SessionBar({ sessions = [], activeSessionId, onSelect, onCreate, onDelete }) {
+export default function SessionBar({ sessions = [], activeSessionId, onSelect, onCreate, onDelete, onExport }) {
   const [open, setOpen] = useState(false);
   const [adding, setAdding] = useState(false);
   const [newName, setNewName] = useState("");
@@ -101,6 +101,15 @@ export default function SessionBar({ sessions = [], activeSessionId, onSelect, o
 
       {/* aggregate stats across all sessions */}
       <div className={styles.right}>
+        {/* export buttons — only when a session is selected */}
+        {activeSessionId && (
+          <>
+            <button className={styles.exportBtn} onClick={() => onExport(activeSessionId, 'csv')}>↓ csv</button>
+            <button className={styles.exportBtn} onClick={() => onExport(activeSessionId, 'excel')}>↓ excel</button>
+            <div className={styles.divider} />
+          </>
+        )}
+        
         <span className={styles.meta}>
           all sessions: <span className={`${styles.metaVal} ${styles.blue}`}>{totalPackets.toLocaleString()} pkts</span>
         </span>

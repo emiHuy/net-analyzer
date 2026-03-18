@@ -19,11 +19,6 @@ async function deleteSession(sessionId) {
     return res.json();
 }
 
-async function fetchStats(sessionId, limit=15) {
-    const res = await fetch(`${API}/stats/${sessionId}?limit=${limit}`);
-    return res.json();
-}
-
 async function startCapture(sessionId) {
     const res = await fetch(`${API}/capture/start/${sessionId}`, { method: 'POST'});
     return res.json();
@@ -37,6 +32,15 @@ async function stopCapture() {
 async function fetchCaptureStatus() {
     const res = await fetch(`${API}/capture/status`);
     return res.json();
+}
+
+async function fetchStats(sessionId, limit=20) {
+    const res = await fetch(`${API}/stats/${sessionId}?limit=${limit}`);
+    return res.json();
+}
+
+async function exportSession(sessionId, format) {
+    window.open(`${API}/export/${sessionId}/${format}`, '_blank');
 }
 
 // Web Socket connection
@@ -61,4 +65,4 @@ function subscribeToStats(sessionId, onData) {
     return () => ws.close();
 }
 
-export { fetchSessions, createSession, deleteSession, fetchStats, startCapture, stopCapture, fetchCaptureStatus, subscribeToStats };
+export { fetchSessions, createSession, deleteSession, fetchStats, startCapture, stopCapture, fetchCaptureStatus, exportSession, subscribeToStats };

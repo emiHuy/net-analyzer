@@ -1,10 +1,13 @@
 from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import Response
 from pydantic import BaseModel
 import asyncio
-from stats import get_all_stats
-from capture import start_capture, stop_capture, get_capture_status
+
 from store import create_session, clear_session, get_all_sessions
+from capture import start_capture, stop_capture, get_capture_status
+from stats import get_all_stats
+from export import export_csv, export_excel
 
 app = FastAPI()
 
@@ -48,22 +51,6 @@ def delete_session(session_id: int):
     return {'deleted': session_id}
 
 
-@app.get('/stats/{session_id}')
-def get_stats(session_id: int, limit: int = 50):
-    """Return statistics for a session."""
-    # Result format:
-    # {
-    #   'top_10_ips': [...],
-    #   'protocol_breakdown': [...],
-    #   'packets_per_minute': [...],
-    #   'total_packets': int,
-    #   'average_packet_size': float,
-    #   'recent_packets': [...],
-    #   'active_hosts': int
-    # }
-    return get_all_stats(session_id, limit)
-
-
 @app.post('/capture/start/{session_id}')
 def capture_start(session_id: int):
     """Start packet capture for a session."""
@@ -88,6 +75,52 @@ def capture_stop():
 def capture_status():
     status = get_capture_status()
     return {'active_session': status}
+
+
+@app.get('/stats/{session_id}')
+def get_stats(session_id: int, limit: int = 15):
+    """Return statistics for a session."""
+    # Result format:
+    # {
+    #   'top_10_ips': [...],
+    #   'protocol_breakdown': [...],
+    #   'packets_per_minute': [...],
+    #   'total_packets': int,
+    #   'average_packet_size': float,
+    #   'recent_packets': [...],
+    #   'active_hosts': int
+    # }
+    return get_all_stats(session_id, limit)
+
+
+@app.get('/export/{session_id}/csv')
+def export_session_csv(session_id: int):
+    """Download all packets for a session as a CSV file."""
+    try: 
+        data, filename = export_csv(session_id)
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    return Response(
+        content=data,
+        media_type='text/csv',
+        headers={'Content-Disposition': f'attachment; filename="{filename}"'},
+    )
+
+
+@app.get('/export/{session_id}/excel')
+def export_session_excel(session_id: int):
+    """Download all packets for a session as an Excel (.xlsx) file."""
+    try:
+        data, filename = export_excel(session_id)
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except RuntimeError as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    return Response(
+        content=data,
+        media_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        headers={'Content-Disposition': f'attachment; filename="{filename}"'},
+    )
 
 
 # Web socket for live dashboard updates

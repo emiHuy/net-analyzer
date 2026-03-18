@@ -3,7 +3,7 @@ import { useState, useRef, useEffect } from 'react';
 import { 
   startCapture, stopCapture, subscribeToStats, 
   fetchSessions, createSession, deleteSession,
-  fetchStats,
+  fetchStats, exportSession
 } from '../api/client.js';
 
 import TopBar from './TopBar.jsx';
@@ -101,11 +101,15 @@ export default function Dashboard() {
     setStats(await fetchStats(id));
   }
 
+  async function onExport(id, format) {
+    return exportSession(id, format)
+  }
+
   return (
     <div>
       {error && <div className={styles.error}>{error}</div>}
       <TopBar sessionId={sessionId} isCapturing={capturing} onStart={onStart} onStop={onStop}/>
-      <SessionBar sessions={sessions} activeSessionId={sessionId} onSelect={onSelect} onCreate={onCreate} onDelete={onDelete}/>
+      <SessionBar sessions={sessions} activeSessionId={sessionId} onSelect={onSelect} onCreate={onCreate} onDelete={onDelete} onExport={onExport}/>
       <MetricCards totalPackets={stats?.total_packets} avgPacketSize={stats?.average_packet_size} packetsPerMin={stats?.packets_per_minute?.at(-1)?.total} activeHosts={stats?.active_hosts}/>
       <div className={styles.grid2}>
         <TopIPs data={stats?.top_10_ips}/>

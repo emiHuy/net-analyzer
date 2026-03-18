@@ -44,6 +44,16 @@ def create_session(name: str) -> int:
         return result.lastrowid
 
 
+def get_session(session_id: int):
+    """Get session from id."""
+    query = select(session_table).where(session_table.c.id == session_id)
+    with engine.connect() as conn:
+        row = conn.execute(query).fetchone()
+    if not row:
+        return None
+    return {'id': row[0], 'name': row[1]}
+
+
 def get_all_sessions():
     """Return all saved sessions."""
     query = (
