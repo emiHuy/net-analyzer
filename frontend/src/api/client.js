@@ -34,7 +34,7 @@ async function fetchCaptureStatus() {
     return res.json();
 }
 
-async function fetchStats(sessionId, limit=20) {
+async function fetchStats(sessionId, limit=18) {
     const res = await fetch(`${API}/stats/${sessionId}?limit=${limit}`);
     return res.json();
 }

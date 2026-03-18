@@ -1,8 +1,6 @@
 import { PieChart, Pie, Tooltip, ResponsiveContainer } from 'recharts';
+import { PROTO_COLOURS } from '../constants/protocols';
 import styles from '../styles/ProtocolBreakdown.module.css';
-
-// accent colors assigned to protocols in order
-const COLORS = ["#4fc3f7", "#a78bfa", "#f59e0b", "#22c55e", "#ef4444", "#94a3b8"];
 
 // custom tooltip shown on slice hover
 const CustomTooltip = ({ active, payload }) => {
@@ -20,7 +18,7 @@ export default function ProtocolBreakdown({ data = [] }) {
   // add fill color to each slice
   const dataWithColors = data.map((d, i) => ({
     ...d,
-    fill: COLORS[i % COLORS.length],
+    fill: PROTO_COLOURS[d.protocol] ?? PROTO_COLOURS['UNK'],
   }));
 
   return (
@@ -53,7 +51,7 @@ export default function ProtocolBreakdown({ data = [] }) {
             {data.map((row, i) => (
               <div key={row.protocol} className={styles.legendItem}>
                 {/* dot color matches pie slice — set inline */}
-                <div className={styles.dot} style={{ background: COLORS[i % COLORS.length] }} />
+                <div className={styles.dot} style={{ background: row.fill }} />
                 <span>{row.protocol}</span>
                 <span className={styles.val}>{row.total}</span>
               </div>

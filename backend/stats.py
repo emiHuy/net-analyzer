@@ -11,7 +11,6 @@ protocol_names = {
     89: 'OSPF',
 }
 
-
 def top_10_ips(session_id: int):
     """Return top 10 source IPs by packet count."""
     # Result format: [{'ip': '192.168.1.1', 'total': 120}, ...]
@@ -78,7 +77,7 @@ def average_packet_size(session_id: int):
         return conn.execute(query).fetchone()[0]
 
 
-def get_packets(session_id: int, limit=15, desc=True):
+def get_packets(session_id: int, limit=18, desc=True):
     """Return X packets for a session."""
     # Result format:
     # [

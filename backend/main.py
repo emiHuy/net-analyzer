@@ -78,7 +78,7 @@ def capture_status():
 
 
 @app.get('/stats/{session_id}')
-def get_stats(session_id: int, limit: int = 15):
+def get_stats(session_id: int, limit: int = 18):
     """Return statistics for a session."""
     # Result format:
     # {
@@ -125,7 +125,7 @@ def export_session_excel(session_id: int):
 
 # Web socket for live dashboard updates
 @app.websocket('/ws/{session_id}')
-async def websocket_endpoint(ws: WebSocket, session_id: int, limit: int = 15):
+async def websocket_endpoint(ws: WebSocket, session_id: int, limit: int = 18):
     try:
         await ws.accept()
         print(f'WebSocket accepted for session {session_id}')

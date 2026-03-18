@@ -1,24 +1,21 @@
 import { useState } from 'react';
+import { PROTO_NAMES, PROTO_COLOURS } from '../constants/protocols';
 import styles from '../styles/PacketFeed.module.css';
-
-// maps protocol name to its badge CSS class
-const BADGE_CLASSES = {
-  TCP: styles.badgeTcp,
-  UDP: styles.badgeUdp,
-  IGMP: styles.badgeIgmp,
-  ICMP: styles.badgeIcmp,
-};
-
-// maps protocol number to name
-const PROTO_NAMES = { 1: 'ICMP', 2: 'IGMP', 6: 'TCP', 17: 'UDP', 41: 'IPv6', 89: 'OSPF' };
 
 const COLLAPSED_LIMIT = 6;
 
 // resolves protocol number or string to a colored badge
 function ProtoBadge({ protocol }) {
-  const name = typeof protocol === 'number' ? (PROTO_NAMES[protocol] ?? 'UNK') : protocol;
+  const name = typeof protocol === 'number' ? (PROTO_NAMES[protocol] ?? 'UNK') : (protocol ?? 'UNK');
+  const colour = PROTO_COLOURS[name];
   return (
-    <span className={`${styles.badge} ${BADGE_CLASSES[name] ?? styles.badgeUnknown}`}>
+    <span 
+      className={`${styles.badge}`} 
+      style={{
+        color: colour,
+        background: `${colour}1a`, // 1a = 10% opacity
+      }}
+    >
       {name}
     </span>
   );
@@ -40,7 +37,7 @@ function formatTimestamp(ts) {
   }
 }
 
-export default function PacketFeed({ data = [], limit = 20 }) {
+export default function PacketFeed({ data = [], limit = 18 }) {
   const [collapsed, setCollapsed] = useState(false);
   // cap rows shown to limit
   const rows = (collapsed ? data.slice(0, COLLAPSED_LIMIT) : data.slice(0, limit));
