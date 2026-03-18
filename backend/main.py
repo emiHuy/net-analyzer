@@ -102,11 +102,14 @@ async def websocket_endpoint(ws: WebSocket, session_id: int, limit: int = 15):
                 await ws.send_json(stats)
             except Exception as e:
                 print(f'Error sending stats for session {session_id}: {e}')
+                stop_capture()
                 return
             await asyncio.sleep(1)
     except WebSocketDisconnect:
         print(f'WebSocket disconnected for session {session_id}')
+        stop_capture()
         return
     except Exception as e:
         print(f"WebSocket error: {e}")
+        stop_capture()
         await ws.close()
