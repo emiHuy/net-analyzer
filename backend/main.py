@@ -6,7 +6,7 @@ import asyncio
 
 from store import create_session, clear_session, get_all_sessions
 from capture import start_capture, stop_capture, get_capture_status
-from stats import get_all_stats, get_packets
+from stats import get_all_stats, get_packets, total_packet_count
 from export import export_csv, export_excel
 
 app = FastAPI()
@@ -56,6 +56,8 @@ def capture_start(session_id: int):
     """Start packet capture for a session."""
     # Result format: {'start_timestamp': '2026-03-16T14:32:10'}
     try:
+        if total_packet_count(session_id) > 0:
+            raise RuntimeError(f'Session {session_id} already has capture data. Create a new session.')
         return start_capture(session_id)
     except RuntimeError as e:
         raise HTTPException(status_code=400, detail=str(e))

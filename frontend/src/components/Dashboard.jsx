@@ -28,6 +28,8 @@ export default function Dashboard() {
   // Holds cleanup function for active WebSocket subscription
   const wsCleanup = useRef(null);
 
+  const sessionHasData = sessions.find(s => s.id === sessionId)?.packet_count > 0;
+
   // Initial load: fetch all sessions when component mounts
   useEffect(() => {
     async function load() {
@@ -110,7 +112,7 @@ export default function Dashboard() {
   return (
     <div>
       {error && <div className={styles.error}>{error}</div>}
-      <TopBar sessionId={sessionId} isCapturing={capturing} onStart={onStart} onStop={onStop}/>
+      <TopBar sessionId={sessionId} isCapturing={capturing} sessionHasData={sessionHasData} onStart={onStart} onStop={onStop}/>
       <SessionBar sessions={sessions} activeSessionId={sessionId} onSelect={onSelect} onCreate={onCreate} onDelete={onDelete} onExport={onExport}/>
       <MetricCards totalPackets={stats?.total_packets} avgPacketSize={stats?.average_packet_size} packetsPerMin={stats?.packets_per_minute?.at(-1)?.total} activeHosts={stats?.active_hosts}/>
       <div className={styles.grid2}>
