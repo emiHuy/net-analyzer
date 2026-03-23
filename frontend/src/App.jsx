@@ -14,6 +14,7 @@ import {
 
 import TopBar     from './components/TopBar.jsx';
 import SessionBar from './components/SessionBar.jsx';
+import NavBar     from './components/NavBar.jsx';
 import Dashboard  from './components/Dashboard.jsx';
 
 import styles from './styles/App.module.css'
@@ -116,10 +117,15 @@ function App() {
       <SessionBar
         sessions={sessions}
         activeSessionId={sessionId}
-        oonSelect={onSelect}
+        onSelect={onSelect}
         onCreate={onCreate}
         onDelete={onDelete}
         onExport={onExport}
+      />
+      <NavBar
+        activeView={activeView}
+        onViewChange={setActiveView}
+        isCapturing={capturing}
       />
       <Dashboard 
         isVisible={activeView === 'dashboard'}
