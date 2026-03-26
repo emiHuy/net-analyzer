@@ -5,14 +5,3 @@
     gap: 10px;
     margin-bottom: 1rem;
 }
-
-/* Error message */
-.error {
-    background: rgba(220, 50, 50, 0.1);
-    border: 1px solid rgba(220, 50, 50, 0.3);
-    color: #ff6b6b;
-    padding: 8px 14px;
-    border-radius: 6px;
-    font-size: 13px;
-    margin: 8px 0;
-}
