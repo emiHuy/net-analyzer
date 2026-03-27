@@ -101,19 +101,9 @@ function App() {
       setStats(newStats);
 
       // overlay live packet activity onto topology nodes
-      setTopology(prev => ({
-        ...prev,
-        nodes: prev.nodes.map(node => {
-          const match = newStats.top_10_ips?.find(r => r.ip === node.ip);
-          return match
-            ? {
-                ...node,
-                packet_count: match.total,
-                last_seen:    new Date().toISOString(),
-              }
-            : node;
-        }),
-      }));
+      if (newStats.topology?.length) {
+        setTopology(prev => ({ ...prev, nodes: newStats.topology }));
+      }
     });
     
     setCapturing(true);
