@@ -208,6 +208,8 @@ function App() {
         activeView={activeView}
         onViewChange={setActiveView}
         isCapturing={capturing}
+        sessionId={sessionId}
+        numAlerts={alerts.length}
       />
       <Dashboard 
         isVisible={activeView === 'dashboard'}

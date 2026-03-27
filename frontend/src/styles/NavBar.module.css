@@ -2,12 +2,19 @@
 .bar {
     display: flex;
     align-items: center;
-    gap: 2px;
+    justify-content: space-between;
     background: #0d1220;
     border: 0.5px solid #1e2a40;
     border-radius: 8px;
-    padding: 5px 8px;
     margin-bottom: 1rem;
+    font-family: monospace;
+}
+
+.bar .buttons {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    padding: 5px 8px;
     font-family: monospace;
 }
 
@@ -53,4 +60,14 @@
 @keyframes navPulse {
     0%, 100% { opacity: 1; }
     50%       { opacity: 0.3; }
+}
+
+.countBadge {
+    font-size: 9px;
+    font-weight: 500;
+    padding: 2px 8px;
+    border-radius: 10px;
+    background: rgba(239, 68, 68, 0.15);
+    color: #ef4444;
+    margin: 8px;
 }
