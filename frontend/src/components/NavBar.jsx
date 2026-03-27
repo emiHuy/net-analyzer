@@ -3,6 +3,7 @@ import styles from '../styles/NavBar.module.css';
 const TAB_INDICATORS = {
     dashboard: '#22c55e',  // green — capturing
     network:   '#f59e0b',  // amber — passive sniffer
+    alerts:    '#f45757',
 };
 
 export default function NavBar( { activeView, onViewChange, isCapturing }) {
@@ -36,6 +37,21 @@ export default function NavBar( { activeView, onViewChange, isCapturing }) {
                     }}
                 />
                 network
+            </button>
+
+            <button
+                className={`${styles.tab} ${activeView === 'alerts' ? styles.tabActive : ''}`}
+                onClick={() => onViewChange('alerts')}
+            >
+                <span
+                    className={styles.indicator}
+                    style={{
+                        background: TAB_INDICATORS.alerts,
+                        // amber dot always slightly visible — sniffer is always available
+                        opacity: 0.6,
+                    }}
+                />
+                alerts
             </button>
         </div>
     );
