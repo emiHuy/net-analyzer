@@ -6,7 +6,8 @@ import asyncio
 
 from db import (
     create_session, clear_session, get_all_sessions, 
-    save_devices, load_devices, session_has_devices
+    save_devices, load_devices, session_has_devices,
+    get_alerts
 )
 from capture import start_capture, stop_capture, get_capture_status
 from stats import get_all_stats, get_packets, total_packet_count
@@ -208,6 +209,14 @@ def trigger_scan():
         'nodes_found': len(nodes),
         'nodes':       nodes,
     }
+
+
+# ── Alerts ────────────────────────────────────────────────────────────────────
+
+@app.get('/alerts/{session_id}')
+def get_session_alerts(session_id: int):
+    """Return all alerts for a session."""
+    return get_alerts(session_id)
 
 
 # ── WebSocket ───────────────────────────────────────────────────────────────────
