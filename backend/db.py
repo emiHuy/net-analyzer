@@ -25,6 +25,7 @@ packet_table = Table(
     Column('src_ip', String),
     Column('dst_ip', String),
     Column('protocol', Integer),
+    Column('dst_port', Integer, nullable=True),
     Column('size', Integer),
     Column('timestamp', String),
 )
@@ -42,6 +43,19 @@ devices_table = Table(
     Column('last_seen',    String),
     Column('bytes_seen',   Integer),
     Column('packet_count', Integer),
+)
+
+# ── Alerts table -──────────────────────────────────────────────────────────────
+alerts_table = Table(
+    'alerts', metadata,
+    Column('id',             Integer, primary_key=True, autoincrement=True),
+    Column('session_id',     Integer),
+    Column('timestamp',      String),
+    Column('src_ip',         String),
+    Column('dst_ip',         String),
+    Column('rule_triggered', String),
+    Column('severity',       String),
+    Column('description',    String),
 )
 
 # Create tables if they do not exist
@@ -103,6 +117,8 @@ def clear_session(session_id: int):
         conn.execute(delete(packet_table).where(packet_table.c.session_id == session_id))
         # Delete associated devices
         conn.execute(delete(devices_table).where(devices_table.c.session_id == session_id))
+        # Delete associated alerts
+        conn.execute(delete(alerts_table).where(alerts_table.c.session_id == session_id))
         # Delete session
         conn.execute(delete(session_table).where(session_table.c.id == session_id))
         conn.commit()
@@ -121,6 +137,7 @@ def store_packet(packet, session_id: int):
             src_ip=packet['src_ip'],
             dst_ip=packet['dst_ip'],
             protocol=packet['protocol'],
+            dst_port=packet['dst_port'],
             size=packet['size'],
             timestamp=packet['timestamp'],
         ))
@@ -198,3 +215,40 @@ def session_has_devices(session_id: int) -> bool:
     )
     with engine.connect() as conn:
         return conn.execute(query).fetchone()[0] > 0
+
+# ── Alert functions -───────────────────────────────────────────────────────────
+
+def save_alert(alert: dict, session_id: int) -> None:
+    with engine.connect() as conn:
+        conn.execute(insert(alerts_table).values(
+            session_id=session_id,
+            timestamp=alert['timestamp'],
+            src_ip=alert['src_ip'],
+            dst_ip=alert['dst_ip'],
+            rule_triggered=alert['rule_triggered'],
+            severity=alert['severity'],
+            description=alert['description'],
+        ))
+        conn.commit()
+
+
+def get_alerts(session_id: int) -> list[dict]:
+    query = (
+        select(alerts_table)
+        .where(alerts_table.c.session_id == session_id)
+        .order_by(alerts_table.c.timestamp.desc())
+    )
+    with engine.connect() as conn:
+        results = conn.execute(query).fetchall()
+    return [
+        {
+            'id':             r._mapping['id'],
+            'timestamp':      r._mapping['timestamp'],
+            'src_ip':         r._mapping['src_ip'],
+            'dst_ip':         r._mapping['dst_ip'],
+            'rule_triggered': r._mapping['rule_triggered'],
+            'severity':       r._mapping['severity'],
+            'description':    r._mapping['description'],
+        }
+        for r in results
+    ]

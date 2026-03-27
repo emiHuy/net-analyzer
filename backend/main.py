@@ -6,7 +6,8 @@ import asyncio
 
 from db import (
     create_session, clear_session, get_all_sessions, 
-    save_devices, load_devices, session_has_devices
+    save_devices, load_devices, session_has_devices,
+    get_alerts
 )
 from capture import start_capture, stop_capture, get_capture_status
 from stats import get_all_stats, get_packets, total_packet_count
@@ -210,6 +211,14 @@ def trigger_scan():
     }
 
 
+# ── Alerts ────────────────────────────────────────────────────────────────────
+
+@app.get('/alerts/{session_id}')
+def get_session_alerts(session_id: int):
+    """Return all alerts for a session."""
+    return get_alerts(session_id)
+
+
 # ── WebSocket ───────────────────────────────────────────────────────────────────
 
 # Web socket for live dashboard updates
@@ -219,7 +228,11 @@ async def websocket_endpoint(ws: WebSocket, session_id: int, limit: int = 18):
         await ws.accept()
         print(f'WebSocket accepted for session {session_id}')
         while True:
-            await ws.send_json(get_all_stats(session_id, limit))
+            await ws.send_json({
+                'stats': get_all_stats(session_id, limit), 
+                'topology' : get_devices(),
+                'alerts':   get_alerts(session_id),
+                })
             await asyncio.sleep(1)
     except WebSocketDisconnect:
         print(f'WebSocket disconnected for session {session_id}')
@@ -230,3 +243,4 @@ async def websocket_endpoint(ws: WebSocket, session_id: int, limit: int = 18):
         if get_capture_status():
             stop_capture()
         await ws.close()
+

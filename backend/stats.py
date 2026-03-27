@@ -109,11 +109,12 @@ def get_packets(session_id: int, limit=18, desc=True):
         results = conn.execute(query).fetchall()
     return [
         {
-            'src_ip':    r[2],
-            'dst_ip':    r[3],
-            'protocol':  r[4],
-            'size':      r[5],
-            'timestamp': r[6],
+            'src_ip':    r._mapping['src_ip'],
+            'dst_ip':    r._mapping['dst_ip'],
+            'protocol':  r._mapping['protocol'],
+            'dst_port':  r._mapping['dst_port'],
+            'size':      r._mapping['size'],
+            'timestamp': r._mapping['timestamp'],
         }
         for r in results
     ]

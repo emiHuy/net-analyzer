@@ -39,7 +39,7 @@ function formatSince(isoString) {
     if (!isoString) return '—';
     const secs = Math.round(secondsSince(isoString));
     if (secs < 60)   return secs + 's ago';
-    if (secs < 3600) return Math.round(secs / 60) + 'min ago';
+    if (secs < 3600) return Math.round(secs / 60) + ' min ago';
     return Math.round(secs / 3600) + 'hr ago';
 }
 
@@ -208,7 +208,7 @@ export default function NetworkGraph({ nodes = [], isVisible, isCapturing, onSca
         const ctx = canvas.getContext('2d');
         ctx.scale(dpr, dpr);
         nodesRef.current = layoutNodes(nodes, W, H);
-    }, [nodes, nodes.length, layoutNodes]);
+    }, [nodes, nodes.length, layoutNodes, isVisible]);
 
     // ── animation loop ────────────────────────────────────────────────────────
     useEffect(() => {
@@ -311,7 +311,7 @@ export default function NetworkGraph({ nodes = [], isVisible, isCapturing, onSca
                             {' · '}
                             {isCapturing
                                 ? `seen ${formatSince(tooltip.device.last_seen)}`
-                                : `${tooltip.device.packet_count || 0} packets total (in + out)`
+                                : `${tooltip.device.packet_count || 0} packets total`
                             }
                         </div>
                     </div>

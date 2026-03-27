@@ -64,6 +64,12 @@ async function triggerScan() {
     return res.json();
 }
 
+async function fetchAlerts(sessionId = null) {
+    if (!sessionId) return;
+    const res = await fetch(`${API}/alerts/${sessionId}`);
+    return res.json();
+}
+
 // Web Socket connection
 function subscribeToStats(sessionId, onData) {
     const ws = new WebSocket(`ws://127.0.0.1:8000/ws/${sessionId}`);
@@ -99,4 +105,5 @@ export {
     fetchTopology,
     triggerScan,
     subscribeToStats,
+    fetchAlerts,
  };
