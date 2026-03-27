@@ -1,5 +1,5 @@
 from scapy.layers.l2 import Ether
-from scapy.layers.inet import IP
+from scapy.layers.inet import IP, TCP, UDP
 from scapy.sendrecv import sniff
 import threading
 from datetime import datetime
@@ -26,12 +26,19 @@ def start_capture(session_id: int):
             protocol = packet[IP].proto
             size = len(packet)
             print(f'IP | {src} → {dst} | Protocol: {protocol}')
+
+            dst_port = None
+            if TCP in packet:
+                dst_port = packet[TCP].dport
+            elif UDP in packet:
+                dst_port = packet[UDP].dport
             
             # Store packet metadata
             store_packet({
                 'src_ip':    src,
                 'dst_ip':    dst,
                 'protocol':  protocol,
+                'dst_port':  dst_port,
                 'size':      size,
                 'timestamp': datetime.now().isoformat(),
             }, session_id)

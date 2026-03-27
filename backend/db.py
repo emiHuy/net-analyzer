@@ -25,6 +25,7 @@ packet_table = Table(
     Column('src_ip', String),
     Column('dst_ip', String),
     Column('protocol', Integer),
+    Column('dst_port', Integer, nullable=True),
     Column('size', Integer),
     Column('timestamp', String),
 )
@@ -121,6 +122,7 @@ def store_packet(packet, session_id: int):
             src_ip=packet['src_ip'],
             dst_ip=packet['dst_ip'],
             protocol=packet['protocol'],
+            dst_port=packet['dst_port'],
             size=packet['size'],
             timestamp=packet['timestamp'],
         ))
