@@ -26,15 +26,13 @@ function formatTimestamp(ts) {
   if (!ts) return '—';
   try {
     const d = new Date(ts);
-    const date = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-    const time = d.toLocaleTimeString('en-CA', {
+    return d.toLocaleTimeString('en-CA', {
       hour: '2-digit',
       minute: '2-digit',
       second: '2-digit',
       fractionalSecondDigits: 3,
       hour12: false,
     });
-    return `${date} ${time}`;
   } catch {
     return ts;
   }
