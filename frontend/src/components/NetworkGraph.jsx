@@ -311,7 +311,7 @@ export default function NetworkGraph({ nodes = [], isVisible, isCapturing, onSca
                             {' · '}
                             {isCapturing
                                 ? `seen ${formatSince(tooltip.device.last_seen)}`
-                                : `${tooltip.device.packet_count || 0} packets total (in + out)`
+                                : `${tooltip.device.packet_count || 0} packets total`
                             }
                         </div>
                     </div>
