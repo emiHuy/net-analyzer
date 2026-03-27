@@ -39,7 +39,7 @@ function formatSince(isoString) {
     if (!isoString) return '—';
     const secs = Math.round(secondsSince(isoString));
     if (secs < 60)   return secs + 's ago';
-    if (secs < 3600) return Math.round(secs / 60) + 'min ago';
+    if (secs < 3600) return Math.round(secs / 60) + ' min ago';
     return Math.round(secs / 3600) + 'hr ago';
 }
 
