@@ -1,7 +1,7 @@
 import csv
 import io
 from stats import get_packets
-from store import get_session
+from db import get_session
 
 HEADERS = ['session_id', 'session_name', 'src_ip', 'dst_ip', 'protocol', 'size', 'timestamp']
 

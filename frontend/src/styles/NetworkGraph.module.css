@@ -1,0 +1,166 @@
+/* ─── panel ───────────────────────────────────────── */
+.panel {
+    background: #0d1220;
+    border: 0.5px solid #1e2a40;
+    border-radius: 8px;
+    overflow: hidden;
+    font-family: monospace;
+}
+
+/* ─── header ──────────────────────────────────────── */
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.875rem 1rem;
+    border-bottom: 0.5px solid #1e2a40;
+}
+
+.title {
+    font-size: 10px;
+    color: #546e8a;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+}
+
+.subnet {
+    color: #2f3f5b;
+    margin-left: 4px;
+}
+
+.headerRight {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+/* passive sniffer indicator */
+.snifferBadge {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 10px;
+    color: #546e8a;
+}
+
+.snifferDot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: #f59e0b;
+    animation: snifferPulse 2s infinite;
+}
+
+@keyframes snifferPulse {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0.3; }
+}
+
+/* scan button */
+.scanBtn {
+    font-family: monospace;
+    font-size: 10px;
+    padding: 4px 12px;
+    border-radius: 4px;
+    border: 0.5px solid #4fc3f7;
+    background: transparent;
+    color: #4fc3f7;
+    cursor: pointer;
+    letter-spacing: 0.05em;
+    transition: background 0.15s ease;
+}
+
+.scanBtn:hover {
+    background: rgba(79, 195, 247, 0.06);
+}
+
+.scanBtnDisabled {
+    opacity: 0.4;
+    cursor: default;
+}
+
+/* ─── canvas wrap ─────────────────────────────────── */
+.canvasWrap {
+    position: relative;
+}
+
+.canvasWrap canvas {
+    display: block;
+}
+
+/* ─── tooltip ─────────────────────────────────────── */
+.tooltip {
+    position: absolute;
+    background: #0d1220;
+    border: 0.5px solid #1e2a40;
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 12px;
+    pointer-events: none;
+    line-height: 1.7;
+    color: #c9d1e0;
+    z-index: 10;
+    max-width: 220px;
+}
+
+.tooltipIp {
+    font-weight: 500;
+    font-size: 13px;
+    margin-bottom: 2px;
+    color: #e2e8f0;
+}
+
+.tooltipMuted {
+    color: #546e8a;
+    font-size: 11px;
+}
+
+.tooltipStats {
+    margin-top: 4px;
+    font-size: 11px;
+    color: #546e8a;
+}
+
+/* ─── info bar ────────────────────────────────────── */
+.infoBar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 16px;
+    border-top: 0.5px solid #1e2a40;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.legend {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+}
+
+.legendItem {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11px;
+    color: #546e8a;
+}
+
+.legendDot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.legendMuted {
+    font-size: 10px;
+    color: #2f3f5b;
+}
+
+.lastScan {
+    font-size: 10px;
+    color: #2f3f5b;
+    white-space: nowrap;
+}
