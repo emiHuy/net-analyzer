@@ -208,7 +208,7 @@ export default function NetworkGraph({ nodes = [], isVisible, isCapturing, onSca
         const ctx = canvas.getContext('2d');
         ctx.scale(dpr, dpr);
         nodesRef.current = layoutNodes(nodes, W, H);
-    }, [nodes, nodes.length, layoutNodes]);
+    }, [nodes, nodes.length, layoutNodes, isVisible]);
 
     // ── animation loop ────────────────────────────────────────────────────────
     useEffect(() => {
