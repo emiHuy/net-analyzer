@@ -1,4 +1,4 @@
-# Network Traffic Analyzer
+# NETAnalyzer
 A Python-based network traffic analyzer that captures live packets, stores them in a SQLite database, and displays real-time stats through a web dashboard. Built with Scapy, FastAPI, and React.
 
 ## Project Status  
