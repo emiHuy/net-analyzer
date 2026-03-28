@@ -5,9 +5,11 @@ from routers import sessions, packets, capture, devices, alerts, network, websoc
 
 app = FastAPI()
 
+_DEFAULT_CORS_ORIGINS = ['http://localhost:5173', 'http://127.0.0.1:5173']
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins= CORS_ORIGINS,
+    allow_origins= CORS_ORIGINS or _DEFAULT_CORS_ORIGINS,
     allow_methods=['*'],
     allow_headers=['*'],
 )
