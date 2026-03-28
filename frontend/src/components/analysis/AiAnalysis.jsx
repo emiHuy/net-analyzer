@@ -1,73 +1,8 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
+import { analyzeSession, analyzeAlert } from '../../api/client.js';
 import styles from './AiAnalysis.module.css';
 
-const API = 'http://localhost:8000';
 const LS_KEY = 'gemini_api_key';
-
-// ── Backend API calls ─────────────────────────────────────────────────────────
-
-async function analyzeSession(stats, alerts, apiKey) {
-  const proto = (stats?.protocol_breakdown ?? [])
-    .map(p => `${p.protocol}: ${p.total}`)
-    .join(', ');
-
-  const topIps = (stats?.top_10_ips ?? [])
-    .slice(0, 5)
-    .map(ip => `${ip.ip} (${ip.total} pkts)`)
-    .join(', ');
-
-  const ppm = stats?.packets_per_minute ?? [];
-  const peak = ppm.length ? Math.max(...ppm.map(p => p.total)) : 0;
-
-  const alertsSummary = alerts.length === 0
-    ? 'No anomalies detected.'
-    : alerts.slice(0, 5)
-        .map(a => `[${a.severity.toUpperCase()}] ${a.rule_triggered}: ${a.description}`)
-        .join('\n');
-
-  const res = await fetch(`${API}/ai/analyze/session`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      api_key:              apiKey,
-      total_packets:        stats?.total_packets ?? 0,
-      avg_packet_size:      stats?.average_packet_size ?? null,
-      active_hosts:         stats?.active_hosts ?? 0,
-      peak_packets_per_min: peak,
-      protocol_breakdown:   proto,
-      top_ips:              topIps,
-      alert_count:          alerts.length,
-      alerts_summary:       alertsSummary,
-    }),
-  });
-
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err?.detail ?? `Server error ${res.status}`);
-  }
-  return (await res.json()).result;
-}
-
-async function analyzeAlert(alert, apiKey) {
-  const res = await fetch(`${API}/ai/analyze/alert`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      api_key:     apiKey,
-      rule:        alert.rule_triggered,
-      severity:    alert.severity,
-      src_ip:      alert.src_ip,
-      dst_ip:      alert.dst_ip,
-      description: alert.description,
-    }),
-  });
-
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err?.detail ?? `Server error ${res.status}`);
-  }
-  return (await res.json()).result;
-}
 
 // ── Markdown renderer ─────────────────────────────────────────────────────────
 
@@ -104,8 +39,8 @@ function Skeleton() {
 
 // ── API key input (shared by setup screen + change flow) ──────────────────────
 
-function KeyInput({ onSave, onCancel, autoFocus = true, currentVal = '' }) {
-  const [val, setVal] = useState(currentVal);
+function KeyInput({ onSave, onCancel, autoFocus = true, currentValue = '' }) {
+  const [val, setVal] = useState(currentValue);
   const [show, setShow] = useState(false);
   const [err, setErr] = useState(null);
 
@@ -219,26 +154,41 @@ function AlertExplainer({ alert, apiKey }) {
 // ── Main component ────────────────────────────────────────────────────────────
 
 export default function AiAnalysis({ isVisible, stats, alerts = [], sessionId }) {
+  // null = env key active (no UI key needed), string = user-provided key
   const [apiKey, setApiKey] = useState(() => localStorage.getItem(LS_KEY) ?? null);
+  const [envConfigured, setEnvConfigured] = useState(false);
   const [changingKey, setChangingKey] = useState(false);
   const [summary, setSummary] = useState(null);
   const [summaryLoading, setSummaryLoading] = useState(false);
   const [summaryError, setSummaryError] = useState(null);
 
+  // Check if backend has an env key — if so, no UI key needed
+  useEffect(() => {
+    fetch('http://localhost:8000/ai/status')
+      .then(r => r.json())
+      .then(({ configured }) => setEnvConfigured(configured))
+      .catch(() => setEnvConfigured(false));
+  }, []);
+
+  // Ready if env key exists OR user has provided one
+  const ready = envConfigured || !!apiKey;
+  // Key to send with requests — null means backend will use its env key
+  const activeKey = envConfigured ? null : apiKey;
+
   const hasData = (stats?.total_packets ?? 0) > 0;
 
   const generateSummary = useCallback(async () => {
-    if (!stats || !apiKey) return;
+    if (!stats) return;
     setSummaryLoading(true);
     setSummaryError(null);
     try {
-      setSummary(await analyzeSession(stats, alerts, apiKey));
+      setSummary(await analyzeSession(stats, alerts, activeKey));
     } catch (e) {
       setSummaryError(e.message);
     } finally {
       setSummaryLoading(false);
     }
-  }, [stats, alerts, apiKey]);
+  }, [stats, alerts, activeKey]);
 
   function handleNewKey(key) {
     setApiKey(key);
@@ -247,31 +197,49 @@ export default function AiAnalysis({ isVisible, stats, alerts = [], sessionId })
     setSummaryError(null);
   }
 
+  function clearKey() {
+    localStorage.removeItem(LS_KEY);
+    setApiKey(null);
+    setChangingKey(false);
+    setSummary(null);
+    setSummaryError(null);
+  }
+
   return (
     <div className={styles.panel} style={{ display: isVisible ? '' : 'none' }}>
 
-      {/* ── No key yet ── */}
-      {!apiKey && <ApiKeySetup onSave={handleNewKey} />}
+      {/* ── No key anywhere — show setup ── */}
+      {!ready && <ApiKeySetup onSave={handleNewKey} />}
 
-      {/* ── Key active ── */}
-      {apiKey && (
+      {/* ── Ready ── */}
+      {ready && (
         <>
-          {/* Banner — shows status or inline change form */}
+          {/* Banner */}
           {changingKey ? (
             <div className={styles.keyChangeBanner}>
               <span className={styles.keyChangeLabel}>new api key</span>
-              <KeyInput
-                onSave={handleNewKey}
-                onCancel={() => setChangingKey(false)}
-                currentVal={apiKey}
-              />
+              <KeyInput onSave={handleNewKey} onCancel={() => setChangingKey(false)} currentValue={apiKey} />
             </div>
           ) : (
             <div className={styles.keyBanner}>
-              <span className={styles.keyActive}>✦ gemini api · ready</span>
-              <button className={styles.clearKeyBtn} onClick={() => setChangingKey(true)}>
-                change key
-              </button>
+              {envConfigured ? (
+                <>
+                  <span className={styles.keyActive}>✦ gemini api · env key active</span>
+                  {/* if they also have a localStorage key, offer to clear it */}
+                  {apiKey && (
+                    <button className={styles.clearKeyBtn} onClick={clearKey}>
+                      clear ui key
+                    </button>
+                  )}
+                </>
+              ) : (
+                <>
+                  <span className={styles.keyActive}>✦ gemini api · ready</span>
+                  <button className={styles.clearKeyBtn} onClick={() => setChangingKey(true)}>
+                    change key
+                  </button>
+                </>
+              )}
             </div>
           )}
 
@@ -326,7 +294,7 @@ export default function AiAnalysis({ isVisible, stats, alerts = [], sessionId })
             ) : (
               <div className={styles.alertList}>
                 {alerts.map(alert => (
-                  <AlertExplainer key={alert.id} alert={alert} apiKey={apiKey} />
+                  <AlertExplainer key={alert.id} alert={alert} apiKey={activeKey} />
                 ))}
               </div>
             )}
