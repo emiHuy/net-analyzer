@@ -102,10 +102,10 @@ function Skeleton() {
   );
 }
 
-// ── API key setup ─────────────────────────────────────────────────────────────
+// ── API key input (shared by setup screen + change flow) ──────────────────────
 
-function ApiKeySetup({ onSave }) {
-  const [val, setVal] = useState('');
+function KeyInput({ onSave, onCancel, autoFocus = true, currentVal = '' }) {
+  const [val, setVal] = useState(currentVal);
   const [show, setShow] = useState(false);
   const [err, setErr] = useState(null);
 
@@ -118,6 +118,39 @@ function ApiKeySetup({ onSave }) {
   }
 
   return (
+    <div className={styles.keyInputBlock}>
+      <div className={styles.keyRow}>
+        <input
+          className={styles.keyInput}
+          type={show ? 'text' : 'password'}
+          placeholder="AIza..."
+          value={val}
+          onChange={e => { setVal(e.target.value); setErr(null); }}
+          onKeyDown={e => {
+            if (e.key === 'Enter') save();
+            if (e.key === 'Escape' && onCancel) onCancel();
+          }}
+          spellCheck={false}
+          autoComplete="off"
+          autoFocus={autoFocus}
+        />
+        <button className={styles.showBtn} onClick={() => setShow(s => !s)}>
+          {show ? 'hide' : 'show'}
+        </button>
+        <button className={styles.saveBtn} onClick={save}>save</button>
+        {onCancel && (
+          <button className={styles.cancelBtn} onClick={onCancel}>cancel</button>
+        )}
+      </div>
+      {err && <div className={styles.keyError}>{err}</div>}
+    </div>
+  );
+}
+
+// ── First-time setup screen ───────────────────────────────────────────────────
+
+function ApiKeySetup({ onSave }) {
+  return (
     <div className={styles.keySetup}>
       <div className={styles.keyGlyph}>✦</div>
       <p className={styles.keyTitle}>gemini api key required</p>
@@ -128,26 +161,7 @@ function ApiKeySetup({ onSave }) {
         </a>
         . Stored in your browser — only sent to your local backend.
       </p>
-      <div className={styles.keyRow}>
-        <input
-          className={styles.keyInput}
-          type={show ? 'text' : 'password'}
-          placeholder="AIza..."
-          value={val}
-          onChange={e => { setVal(e.target.value); setErr(null); }}
-          onKeyDown={e => e.key === 'Enter' && save()}
-          spellCheck={false}
-          autoComplete="off"
-          autoFocus
-        />
-        <button className={styles.showBtn} onClick={() => setShow(s => !s)}>
-          {show ? 'hide' : 'show'}
-        </button>
-        <button className={styles.saveBtn} onClick={save}>
-          save
-        </button>
-      </div>
-      {err && <div className={styles.keyError}>{err}</div>}
+      <KeyInput onSave={onSave} />
     </div>
   );
 }
@@ -206,6 +220,7 @@ function AlertExplainer({ alert, apiKey }) {
 
 export default function AiAnalysis({ isVisible, stats, alerts = [], sessionId }) {
   const [apiKey, setApiKey] = useState(() => localStorage.getItem(LS_KEY) ?? null);
+  const [changingKey, setChangingKey] = useState(false);
   const [summary, setSummary] = useState(null);
   const [summaryLoading, setSummaryLoading] = useState(false);
   const [summaryError, setSummaryError] = useState(null);
@@ -225,9 +240,9 @@ export default function AiAnalysis({ isVisible, stats, alerts = [], sessionId })
     }
   }, [stats, alerts, apiKey]);
 
-  function clearKey() {
-    localStorage.removeItem(LS_KEY);
-    setApiKey(null);
+  function handleNewKey(key) {
+    setApiKey(key);
+    setChangingKey(false);
     setSummary(null);
     setSummaryError(null);
   }
@@ -235,14 +250,30 @@ export default function AiAnalysis({ isVisible, stats, alerts = [], sessionId })
   return (
     <div className={styles.panel} style={{ display: isVisible ? '' : 'none' }}>
 
-      {!apiKey && <ApiKeySetup onSave={setApiKey} />}
+      {/* ── No key yet ── */}
+      {!apiKey && <ApiKeySetup onSave={handleNewKey} />}
 
+      {/* ── Key active ── */}
       {apiKey && (
         <>
-          <div className={styles.keyBanner}>
-            <span className={styles.keyActive}>✦ gemini api · ready</span>
-            <button className={styles.clearKeyBtn} onClick={clearKey}>change key</button>
-          </div>
+          {/* Banner — shows status or inline change form */}
+          {changingKey ? (
+            <div className={styles.keyChangeBanner}>
+              <span className={styles.keyChangeLabel}>new api key</span>
+              <KeyInput
+                onSave={handleNewKey}
+                onCancel={() => setChangingKey(false)}
+                currentVal={apiKey}
+              />
+            </div>
+          ) : (
+            <div className={styles.keyBanner}>
+              <span className={styles.keyActive}>✦ gemini api · ready</span>
+              <button className={styles.clearKeyBtn} onClick={() => setChangingKey(true)}>
+                change key
+              </button>
+            </div>
+          )}
 
           {/* Session summary */}
           <div className={styles.section}>

@@ -329,3 +329,146 @@
     background: rgba(239, 68, 68, 0.12);
     color: #ef4444;
 }
+
+/* ─── key change banner ───────────────────────────── */
+.keyChangeBanner {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 10px 12px;
+    background: rgba(79, 195, 247, 0.04);
+    border: 0.5px solid rgba(79, 195, 247, 0.2);
+    border-radius: 5px;
+    margin-bottom: 1rem;
+}
+
+.keyChangeLabel {
+    font-size: 10px;
+    color: #546e8a;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+}
+
+/* ─── shared key input block ──────────────────────── */
+.keyInputBlock {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    width: 100%;
+}
+
+/* ─── cancel button ───────────────────────────────── */
+.cancelBtn {
+    font-family: monospace;
+    font-size: 10px;
+    padding: 6px 10px;
+    border-radius: 4px;
+    border: 0.5px solid #1e2a40;
+    background: transparent;
+    color: #546e8a;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: border-color 0.15s, color 0.15s;
+}
+
+.cancelBtn:hover {
+    border-color: #ef4444;
+    color: #ef4444;
+    background: rgba(239, 68, 68, 0.06);
+}
+
+/* ─── key row layout ──────────────────────────────── */
+.keyRow {
+    display: flex;
+    gap: 6px;
+    width: 100%;
+    align-items: center;
+}
+
+/* ─── key input field ─────────────────────────────── */
+.keyInput {
+    flex: 1;
+    font-family: monospace;
+    font-size: 11px;
+    padding: 6px 10px;
+    border-radius: 5px;
+    border: 0.5px solid #1e2a40;
+    background: #151d2e;
+    color: #e2e8f0;
+    outline: none;
+    min-width: 0;
+    transition: border-color 0.15s;
+}
+
+.keyInput:focus {
+    border-color: #4fc3f7;
+}
+
+.keyInput::placeholder {
+    color: #2f3f5b;
+}
+
+/* ─── show / hide button ──────────────────────────── */
+.showBtn {
+    font-family: monospace;
+    font-size: 10px;
+    padding: 6px 10px;
+    border-radius: 4px;
+    border: 0.5px solid #1e2a40;
+    background: transparent;
+    color: #546e8a;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: border-color 0.15s, color 0.15s;
+}
+
+.showBtn:hover {
+    border-color: #2f3f5b;
+    color: #94a3b8;
+}
+
+/* ─── save button ─────────────────────────────────── */
+.saveBtn {
+    font-family: monospace;
+    font-size: 10px;
+    padding: 6px 14px;
+    border-radius: 4px;
+    border: 0.5px solid #22c55e;
+    background: rgba(34, 197, 94, 0.08);
+    color: #22c55e;
+    cursor: pointer;
+    flex-shrink: 0;
+    font-weight: 500;
+    transition: background 0.15s;
+}
+
+.saveBtn:hover {
+    background: rgba(34, 197, 94, 0.15);
+}
+
+/* ─── change key button (in ready banner) ─────────── */
+.clearKeyBtn {
+    font-family: monospace;
+    font-size: 10px;
+    padding: 3px 10px;
+    border-radius: 4px;
+    border: 0.5px solid #1e2a40;
+    background: transparent;
+    color: #546e8a;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: border-color 0.15s, color 0.15s;
+}
+
+.clearKeyBtn:hover {
+    border-color: #4fc3f7;
+    color: #4fc3f7;
+    background: rgba(79, 195, 247, 0.05);
+}
+
+/* ─── key error message ───────────────────────────── */
+.keyError {
+    font-size: 10px;
+    color: #ef4444;
+    padding-left: 2px;
+}
