@@ -17,7 +17,7 @@ async function createSession(name) {
 
 async function deleteSession(sessionId) {
     const res = await fetch(`${API}/sessions/${sessionId}`, { method: 'DELETE' });
-    return res.json();
+    if (!res.ok) throw new Error(`${res.status}`);
 }
 
 async function startCapture(sessionId) {

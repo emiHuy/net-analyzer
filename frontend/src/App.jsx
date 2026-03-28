@@ -189,13 +189,13 @@ function App() {
       return;
     }
     try {
+      await deleteSession(id);
       if (id == sessionId) {
         setSessionId(null);
         setStats(null);
         setTopology({ nodes: [] }); 
         setAlerts([]);
       }
-      await deleteSession(id);
       setSessions(await fetchSessions());
       toast.success('Session deleted', `Session removed from database.`);
     } catch (e) {
