@@ -4,7 +4,7 @@ const TAB_INDICATORS = {
     dashboard: '#22c55e',  // green — capturing
     network:   '#f59e0b',  // amber — passive sniffer
     alerts:    '#f45757',
-    analysis:  '#c699d6',
+    analysis:  '#a78bfa',
 };
 
 export default function NavBar( { activeView, onViewChange, isCapturing, sessionId, numAlerts }) {
