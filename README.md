@@ -8,6 +8,7 @@ A Python-based network traffic analyzer that captures live packets, stores them 
 ✅ **M3** — Live web dashboard (FastAPI + React)  
 ✅ **M4** — Network Device Diagram   
 ✅ **M5** — Rule-Based Anomaly Detection
+✅ **M6** — AI Packet Summaries
 
 ---
 
