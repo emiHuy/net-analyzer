@@ -1,4 +1,3 @@
-import styles from './MetricCards.module.css';
 /**
  * @file MetricsCards.jsx
  * @description Headline stat cards displayed at the top of the dashboard.
@@ -20,6 +19,7 @@ import styles from './MetricCards.module.css';
  *   @prop {number} activeHosts    - Number of unique IPs seen this session.
  */
 
+import styles from './MetricsCards.module.css';
 
 /**
  * A single metric card with a label, large value, and muted sub-label.
