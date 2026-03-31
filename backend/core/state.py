@@ -7,7 +7,7 @@ and anomaly detection. Designed as a singleton to be shared across modules.
 
 import threading
 from datetime import datetime
-from anomaly import AnomalyDetector
+from services.anomaly import AnomalyDetector
 
 
 class CaptureManager:

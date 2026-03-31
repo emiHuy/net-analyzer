@@ -10,8 +10,8 @@ import asyncio
 
 from services.stats import get_all_stats
 from services.capture import stop, get_status
+from services.network_scan import get_devices
 from db.alerts import get_alerts
-from network_scan import get_devices
 
 router = APIRouter()
 

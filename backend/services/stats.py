@@ -30,7 +30,7 @@ from sqlalchemy import select, func
 from db import engine
 from db.models import packet_table
 from db.packets import get_packets, count_packets
-from network_scan import get_subnet
+from services.network_scan import get_subnet
 import ipaddress
 
 def _is_local(ip: str) -> bool:

@@ -25,7 +25,7 @@ from core.state import capture_manager
 from db.packets import store_packet, count_packets
 from db.alerts import save_alert
 from db.devices import save_devices
-from network_scan import (
+from services.network_scan import (
     start_passive_sniffer, 
     stop_passive_sniffer, 
     record_packet, 

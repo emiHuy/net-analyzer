@@ -21,7 +21,7 @@ This layer abstracts:
 ───────────────────────────────────────────────────────────────────────────────
 """
 
-from network_scan import active_scan, get_devices, clear_devices, get_subnet
+from services.network_scan import active_scan, get_devices, clear_devices, get_subnet
 from db.devices import load_devices, has_devices
 
 def get_topology(session_id: int | None = None) -> dict:

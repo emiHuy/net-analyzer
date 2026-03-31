@@ -11,7 +11,6 @@ from pydantic import BaseModel
 from db.alerts import get_alerts
 from db.sessions import create_session, get_all_sessions, delete_session
 from db.packets import get_packets
-from services.capture import stop, get_status
 from services.export import export_csv, export_excel
 from services.stats import get_all_stats
 from services.topology import get_topology
